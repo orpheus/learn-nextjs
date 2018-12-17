@@ -15,11 +15,11 @@ const options = {
 	useCreateIndex: true,
 	useFindAndModify: false,
 };
-
-mongoose.connect(
-	MONGO_URL,
-	options,
-);
+//
+// mongoose.connect(
+// 	MONGO_URL,
+// 	options,
+// );
 
 const port = process.env.PORT || 8000;
 const ROOT_URL = `http://localhost:${port}`;
@@ -31,7 +31,8 @@ app.prepare().then(() => {
 	const server = express();
 
 	server.get('/', async (req, res) => {
-		const user = await User.findOne({ slug: 'team-builder-book' });
+		// const user = await User.findOne({ slug: 'team-builder-book' });
+		const user = {email: 'ryan.gnar@yahoo.com'}
 		app.render(req, res, '/', { user });
 	});
 
