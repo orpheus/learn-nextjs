@@ -5,7 +5,19 @@ import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
 import Avatar from '@material-ui/core/Avatar';
 
+import MenuDrop from './MenuDrop';
 import { styleToolbar } from './SharedStyles';
+
+const optionsMenu = [
+	{
+		text: 'Got question?',
+		href: 'https://github.com/builderbook/builderbook/issues',
+	},
+	{
+		text: 'Log out',
+		href: '/logout',
+	},
+];
 
 const Header = ({user}) => (
 	<div>
@@ -33,11 +45,9 @@ const Header = ({user}) => (
 				<Grid item sm={1} xs={3} style={{ textAlign: 'right' }}>
 					{user ? (
 						<div style={{ whiteSpace: ' nowrap' }}>
-							<Avatar
-								src={user.avatarUrl}
-								alt={user.displayName}
-								style={{ margin: '0px auto 0px 20px' }}
-							/>
+							{user.avatarUrl ? (
+								<MenuDrop options={optionsMenu} src={user.avatarUrl} alt={user.displayName} />
+							) : null}
 						</div>
 					) : (
 						<Link prefetch href="/login">
