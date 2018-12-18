@@ -53,7 +53,8 @@ app.prepare().then(() => {
 	server.get('/', async (req, res) => {
 		const user = await User.findOne({slug: 'team-builder-book'});
 		req.user = user
-		app.render(req, res, '/', {test: 'ryan'});
+		let query = {} // query object gets passed to the ctx object of getInitialProps for the HOC. Can give additional props here.
+		app.render(req, res, '/', query);
 	});
 
 	server.get('*', (req, res) => handle(req, res));
