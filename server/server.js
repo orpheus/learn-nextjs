@@ -2,6 +2,8 @@ import dotenv from 'dotenv';
 import express from 'express';
 import next from 'next';
 import mongoose from 'mongoose';
+import session from 'express-session';
+import mongoSessionStore from 'connect-mongo';
 
 import User from './models/User';
 
@@ -24,17 +26,33 @@ mongoose.connect(
 const port = process.env.PORT || 8000;
 const ROOT_URL = `http://localhost:${port}`;
 
-const app = next({ dev });
+const app = next({dev});
 const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
 	const server = express();
 
+	const MongoStore = mongoSessionStore(session);
+
+	const sess = session({
+		name: 'nextjs.sid',
+		secret: 'HD2w.)q*VqRT4/#NK2M/,E^B)}FED5fWU!dKe[wk',
+		store: new MongoStore({
+			mongooseConnection: mongoose.connection,
+			ttl: 14 * 24 * 60 * 60, // save session 14 days
+		}),
+		resave: false,
+		saveUninitialized: false,
+		cookie: {
+			httpOnly: true,
+			maxAge: 14 * 24 * 60 * 60 * 1000,
+		}
+	});
+	server.use(sess);
+
 	server.get('/', async (req, res) => {
-		const user = await User.findOne({ slug: 'team-builder-book' });
-		// console.log('user: ', user)
-		// const user = {email: 'ryan.gnar@yahoo.com'}
-		app.render(req, res, '/', { user });
+		const user = await User.findOne({slug: 'team-builder-book'});
+		app.render(req, res, '/', {user});
 	});
 
 	server.get('*', (req, res) => handle(req, res));

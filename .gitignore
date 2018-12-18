@@ -13,3 +13,4 @@ node_modules/
 .env
 .next
 .idea
+scratch/
