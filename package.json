@@ -4,8 +4,7 @@
   "scripts": {
     "build": "next build",
     "start": "next start",
-    "dev": "next",
-    "dev-express": "nodemon server/server.js --watch server --exec babel-node --presets=@babel/preset-env"
+    "dev": "nodemon server/server.js --watch server --exec babel-node --presets=@babel/preset-env"
   },
   "license": "MIT",
   "dependencies": {
