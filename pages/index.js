@@ -35,4 +35,4 @@ class Index extends React.Component {
 	}
 }
 
-export default withAuth(withLayout(Index));
+export default withAuth(withLayout(Index))
