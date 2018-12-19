@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import session from 'express-session';
 import mongoSessionStore from 'connect-mongo';
 
-import User from './models/User';
+import auth from './google'
 
 dotenv.config();
 
@@ -50,12 +50,7 @@ app.prepare().then(() => {
 	});
 	server.use(sess);
 
-	server.get('/', async (req, res) => {
-		const user = await User.findOne({slug: 'team-builder-book'});
-		req.user = user
-		let query = {} // query object gets passed to the ctx object of getInitialProps for the HOC. Can give additional props here.
-		app.render(req, res, '/', query);
-	});
+	auth({ server, ROOT_URL })
 
 	server.get('*', (req, res) => handle(req, res));
 
