@@ -32,6 +32,11 @@ class MyDocument extends Document {
 				/>
 				<link rel="stylesheet" href="https://storage.googleapis.com/builderbook/vs.min.css"/>
 				{/*3. global styles*/}
+				{/*<link rel="stylesheet" type="text/css" href="/static/nprogress.css" /> /!* Move to CDN for prod*!/*/}
+				<link
+					rel="stylesheet"
+					href="https://storage.googleapis.com/builderbook/nprogress.min.css"
+				/>
 				<style>
 					{`
 					   a, a:focus {
