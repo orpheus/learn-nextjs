@@ -59,7 +59,6 @@ export default async function getEmailTemplate(name, params) {
 	if (!source) {
 		throw new Error('No EmailTemplates found. Please check that at least one is generated at server startup, restart your server and try again.');
 	}
-
 	return {
 		message: _.template(source.message)(params),
 		subject: _.template(source.subject)(params),
