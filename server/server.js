@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import session from 'express-session';
 import mongoSessionStore from 'connect-mongo';
 import logger from './logs'
-
+import api from './api'
 import auth from './google'
 
 dotenv.config();
@@ -52,6 +52,7 @@ app.prepare().then(() => {
 	server.use(sess);
 
 	auth({ server, ROOT_URL })
+	api(server);
 
 	server.get('*', (req, res) => handle(req, res));
 
