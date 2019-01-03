@@ -112,7 +112,7 @@ class UserClass {
 				body: template.message,
 			});
 		} catch (err) {
-			logger.error('Email sending error:', err);
+			logger.error(`Error sending email: ${err}`);
 		}
 
 		return _.pick(newUser, UserClass.publicFields());
