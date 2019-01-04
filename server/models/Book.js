@@ -80,7 +80,8 @@ class BookClass {
 			name,
 			slug,
 			price,
-			githubRepo
+			githubRepo,
+			createdAt: new Date(),
 		});
 	}
 
