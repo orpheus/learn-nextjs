@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 
+import generateSlug from '../utils/slugify';
 import Book from './Book';
 
 const {Schema} = mongoose
@@ -89,6 +90,74 @@ class ChapterClass {
 		chapterObj.book = book;
 
 		return chapterObj;
+	}
+
+	static async syncContent({ book, data }) {
+		const {
+			title,
+			excerpt = '',
+			isFree = false,
+			seoTitle = '',
+			seoDescription = '',
+		} = data.attributes;
+
+		const { body, path } = data;
+
+		const chapter = await this.findOne({
+			bookId: book.id,
+			githubFilePath: path,
+		});
+
+		let order;
+
+		if (path === 'introduction.md') {
+			order = 1;
+		} else {
+			order = parseInt(path.match(/[0-9]+/), 10) + 1;
+		}
+
+		// 1. if chapter document does not exist - create slug and create document with all parameters
+		if (!chapter) {
+			const slug = await generateSlug(this, title, { bookId: book._id });
+
+			return this.create({
+				bookId: book._id,
+				githubFilePath: path,
+				title,
+				slug,
+				isFree,
+				content,
+				htmlContent,
+				sections,
+				excerpt,
+				htmlExcerpt,
+				order,
+				seoTitle,
+				seoDescription,
+				createdAt: new Date(),
+			});
+		}
+		// 2. else, define modifier for parameters: content, htmlContent, sections, excerpt, htmlExcerpt, isFree, order, seoTitle, seoDescription
+		const modifier = {
+			content,
+			htmlContent,
+			sections,
+			excerpt,
+			htmlExcerpt,
+			isFree,
+			order,
+			seoTitle,
+			seoDescription,
+		};
+
+		if (title !== chapter.title) {
+			modifier.title = title;
+			modifier.slug = await generateSlug(this, title, {
+				bookId: chapter.bookId,
+			});
+		}
+		// 3. update existing document with modifier
+		return this.updateOne({ _id: chapter._id }, { $set: modifier });
 	}
 }
 
