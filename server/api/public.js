@@ -7,7 +7,7 @@ import logger from '../logs'
 
 const router = express.Router();
 
-router.get('/books', async (req, res) => {)
+router.get('/books', async (req, res) => {
 	try {
 		const books = await Book.list();
 		res.json(books);
