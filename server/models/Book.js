@@ -2,7 +2,6 @@ import mongoose from 'mongoose';
 
 import generateSlug from '../utils/slugify';
 import Chapter from './Chapter';
-import logger from '../logs'
 
 const {Schema} = mongoose;
 
@@ -45,7 +44,6 @@ class BookClass {
 	}
 
 	static async getBySlug({slug}) {
-		logger.info(`getting book by slug: ${slug}`)
 		// some code
 		let bookDoc
 		try {

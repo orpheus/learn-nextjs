@@ -7,8 +7,7 @@ import logger from '../logs'
 
 const router = express.Router();
 
-router.get('/books', async (req, res) => {
-	logger.info('/books')
+router.get('/books', async (req, res) => {)
 	try {
 		const books = await Book.list();
 		res.json(books);
@@ -18,7 +17,6 @@ router.get('/books', async (req, res) => {
 });
 
 router.get('/books/:slug', async (req, res) => {
-	logger.info('/books/:slug')
 	try {
 		const book = await Book.getBySlug({ slug: req.params.slug, userId: req.user && req.user.id });
 		res.json(book);
@@ -28,7 +26,6 @@ router.get('/books/:slug', async (req, res) => {
 });
 
 router.get('/get-chapter-detail', async (req, res) => {
-	logger.info('/get-chapter-detail')
 	const { bookSlug, chapterSlug } = req.query;
 	let chapter
 	try {
