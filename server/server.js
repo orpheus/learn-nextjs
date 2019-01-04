@@ -58,6 +58,12 @@ app.prepare().then(() => {
 	auth({ server, ROOT_URL })
 	api(server);
 
+	server.get('/books/:bookSlug/:chapterSlug', (req, res) => {
+		logger.info('/books/:bookSlug/:chapterSlug')
+		const { bookSlug, chapterSlug } = req.params;
+		app.render(req, res, '/public/read-chapter', { bookSlug, chapterSlug });
+	});
+
 	server.get('*', (req, res) => {
 		const url = URL_MAP[req.path];
 		if (url) {
