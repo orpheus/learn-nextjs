@@ -7,6 +7,7 @@ import mongoSessionStore from 'connect-mongo';
 import logger from './logs'
 import api from './api'
 import auth from './google'
+import routesWithSlug from './routesWithSlug';
 
 dotenv.config();
 
@@ -36,7 +37,7 @@ const URL_MAP = {
 
 app.prepare().then(() => {
 	const server = express();
-
+	server.use(express.json());
 	const MongoStore = mongoSessionStore(session);
 
 	const sess = session({
@@ -57,12 +58,7 @@ app.prepare().then(() => {
 
 	auth({ server, ROOT_URL })
 	api(server);
-
-	server.get('/books/:bookSlug/:chapterSlug', (req, res) => {
-		logger.info('/books/:bookSlug/:chapterSlug')
-		const { bookSlug, chapterSlug } = req.params;
-		app.render(req, res, '/public/read-chapter', { bookSlug, chapterSlug });
-	});
+	routesWithSlug({ server, app });
 
 	server.get('*', (req, res) => {
 		const url = URL_MAP[req.path];
