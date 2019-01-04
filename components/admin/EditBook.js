@@ -9,7 +9,6 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { getGithubRepos } from '../../lib/api/admin';
 import { styleTextField } from '../../components/SharedStyles';
 import notify from '../../lib/notifier';
-import logger from '../../server/logs';
 
 class EditBook extends React.Component {
 	static propTypes = {
@@ -27,7 +26,7 @@ class EditBook extends React.Component {
 		super(props);
 
 		this.state = {
-			book: props.book || {},
+			book: props.book || {name: "", price: 0},
 			repos: [],
 		};
 	}
@@ -37,7 +36,7 @@ class EditBook extends React.Component {
 			const { repos } = await getGithubRepos();
 			this.setState({ repos }); // eslint-disable-line
 		} catch (err) {
-			logger.error(err);
+			console.log(err); // eslint-disable-line
 		}
 	}
 
@@ -78,7 +77,6 @@ class EditBook extends React.Component {
 							value={this.state.book.name}
 							type="text"
 							label="Book's title"
-							labelClassName="textFieldLabel"
 							style={styleTextField}
 							required
 						/>
@@ -124,7 +122,7 @@ class EditBook extends React.Component {
 					</div>
 					<br />
 					<br />
-					<Button raised type="submit">
+					<Button variant="contained" type="submit">
 						Save
 					</Button>
 				</form>
