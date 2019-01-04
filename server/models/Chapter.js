@@ -1,5 +1,7 @@
 import mongoose from 'mongoose'
 
+import Book from './Book';
+
 const {Schema} = mongoose
 
 const mongoSchema = new Schema({
@@ -62,14 +64,23 @@ const mongoSchema = new Schema({
 
 class ChapterClass {
 	static async getBySlug({bookSlug, chapterSlug}) {
-		const book = await Book.getBySlug({slug: bookSlug});
+		let book
+		try {
+			book = await Book.getBySlug({slug: bookSlug});
+		} catch (err) {
+			throw new Error(`Failed to get book by slug`)
+		}
 
 		if (!book) {
 			throw new Error('Not found');
 		}
 
-		const chapter = await this.findOne({bookId: book._id, slug: chapterSlug});
-
+		let chapter
+		try {
+			chapter = await this.findOne({bookId: book._id, slug: chapterSlug});
+		} catch (err) {
+			throw new Error(`Failed to findOne Chapter: ${err}`)
+		}
 		if (!chapter) {
 			throw new Error('Not found');
 		}
@@ -81,8 +92,8 @@ class ChapterClass {
 	}
 }
 
-mongoSchema.index({ bookId: 1, slug: 1 }, { unique: true });
-mongoSchema.index({ bookId: 1, githubFilePath: 1 }, { unique: true });
+mongoSchema.index({bookId: 1, slug: 1}, {unique: true});
+mongoSchema.index({bookId: 1, githubFilePath: 1}, {unique: true});
 
 mongoSchema.loadClass(ChapterClass)
 
