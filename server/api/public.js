@@ -3,7 +3,6 @@ import express from 'express';
 import Book from '../models/Book';
 import Chapter from '../models/Chapter';
 // import User from '../models/User';
-import logger from '../logs'
 
 const router = express.Router();
 
