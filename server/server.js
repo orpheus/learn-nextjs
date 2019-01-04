@@ -7,6 +7,7 @@ import mongoSessionStore from 'connect-mongo';
 import logger from './logs'
 import api from './api'
 import auth from './google'
+import { setupGithub as github } from './github';
 import routesWithSlug from './routesWithSlug';
 
 dotenv.config();
@@ -58,6 +59,7 @@ app.prepare().then(() => {
 	server.use(sess);
 
 	auth({ server, ROOT_URL })
+	github({ server });
 	api(server);
 	routesWithSlug({ server, app });
 
