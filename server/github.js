@@ -98,19 +98,19 @@ function getAPI({accessToken}) {
 export function getRepos({accessToken}) {
 	const github = getAPI({accessToken});
 
-	return github.repos.getAll({per_page: 100});
+	return github.repos.list({per_page: 100});
 }
 
 export function getContent({accessToken, repoName, path}) {
 	const github = getAPI({accessToken});
 	const [owner, repo] = repoName.split('/');
 
-	return github.repos.getContent({owner, repo, path});
+	return github.repos.getContents({owner, repo, path});
 }
 
 export function getCommits({accessToken, repoName, limit}) {
 	const github = getAPI({accessToken});
 	const [owner, repo] = repoName.split('/');
 
-	return github.repos.getCommits({owner, repo, per_page: limit});
+	return github.repos.listCommits({owner, repo, per_page: limit});
 }
