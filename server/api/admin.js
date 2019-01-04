@@ -56,7 +56,6 @@ router.get('/books/detail/:slug', async (req, res) => {
 
 router.post('/books/sync-content', async (req, res) => {
 	const { bookId } = req.body;
-
 	const user = await User.findById(req.user._id, 'isGithubConnected githubAccessToken');
 
 	if (!user.isGithubConnected || !user.githubAccessToken) {
