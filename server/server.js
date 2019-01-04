@@ -33,6 +33,7 @@ const handle = app.getRequestHandler();
 
 const URL_MAP = {
 	'/login': '/public/login',
+	'/my-books': '/customer/my-books',
 };
 
 app.prepare().then(() => {
