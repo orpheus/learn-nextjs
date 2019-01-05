@@ -145,6 +145,13 @@ const mongoSchema = new Schema({
 	},
 	seoTitle: String,
 	seoDescription: String,
+	sections: [
+		{
+			text: String,
+			level: Number,
+			escapedText: String,
+		},
+	],
 });
 
 class ChapterClass {
