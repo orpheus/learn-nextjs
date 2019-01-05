@@ -36,6 +36,7 @@ class ReadChapter extends React.Component {
 		}
 
 		this.state = {
+			showTOC: false,
 			chapter,
 			htmlContent,
 		};
@@ -62,6 +63,10 @@ class ReadChapter extends React.Component {
 
 		return { chapter };
 	}
+
+	toggleChapterList = () => {
+		this.setState({ showTOC: !this.state.showTOC });
+	};
 
 	renderMainContent() {
 		const { chapter, htmlContent } = this.state;
@@ -96,7 +101,11 @@ class ReadChapter extends React.Component {
 	}
 
 	renderSidebar() {
-		const {  chapter } = this.state;
+		const { showTOC, chapter } = this.state;
+
+		if (!showTOC) {
+			return null;
+		}
 
 		const { book } = chapter;
 		const { chapters } = book;
@@ -188,6 +197,9 @@ class ReadChapter extends React.Component {
 					<i // eslint-disable-line
 						className="material-icons"
 						style={styleIcon}
+						onClick={this.toggleChapterList}
+						onKeyPress={this.toggleChapterList}
+						role="button"
 					>
 						format_list_bulleted
 					</i>
