@@ -6,7 +6,8 @@ import Link from 'next/link';
 import throttle from 'lodash/throttle';
 import isEqual from 'lodash/isEqual';
 
-import { getChapterDetail } from '../../lib/api/public';
+import Header from '../../components/Header';
+import {getChapterDetail} from '../../lib/api/public';
 import withLayout from '../../lib/withLayout';
 import withAuth from '../../lib/withAuth';
 
@@ -30,7 +31,7 @@ class ReadChapter extends React.Component {
 	constructor(props) {
 		super(props);
 
-		const { chapter } = props;
+		const {chapter} = props;
 
 		let htmlContent = '';
 		if (chapter) {
@@ -39,6 +40,7 @@ class ReadChapter extends React.Component {
 
 		this.state = {
 			showTOC: false,
+			hideHeader: false,
 			chapter,
 			htmlContent,
 		};
@@ -48,15 +50,25 @@ class ReadChapter extends React.Component {
 		document.getElementById('main-content').addEventListener('scroll', this.onScroll);
 	}
 
-	componentWillUnmount() {
-		document.getElementById('main-content').removeEventListener('scroll', this.onScroll);
-	}
-
 	onScroll = throttle(() => {
+		this.onScrollActiveSection();
+		this.onScrollHideHeader();
+	}, 500);
+
+	onScrollHideHeader = () => {
+		const distanceFromTop = document.getElementById('main-content').scrollTop;
+		const hideHeader = distanceFromTop > 500;
+
+		if (this.state.hideHeader !== hideHeader) {
+			this.setState({hideHeader});
+		}
+	};
+
+	onScrollActiveSection = () => {
 		const sectionElms = document.querySelectorAll('span.section-anchor');
 		let activeSection;
 
-		let sectionAbove;
+		let aboveSection;
 		for (let i = 0; i < sectionElms.length; i += 1) {
 			const s = sectionElms[i];
 			const b = s.getBoundingClientRect();
@@ -71,7 +83,7 @@ class ReadChapter extends React.Component {
 			}
 
 			if (anchorBottom > window.innerHeight && i > 0) {
-				if (sectionAbove.bottom <= 0) {
+				if (aboveSection.bottom <= 0) {
 					activeSection = {
 						hash: sectionElms[i - 1].attributes.getNamedItem('name').value,
 					};
@@ -83,57 +95,61 @@ class ReadChapter extends React.Component {
 				};
 			}
 
-			sectionAbove = b;
+			aboveSection = b;
 		}
-
 
 		if (!isEqual(this.state.activeSection, activeSection)) {
-			this.setState({ activeSection });
+			this.setState({activeSection});
 		}
-	}, 500);
+	};
+
+	componentWillUnmount() {
+		document.getElementById('main-content').removeEventListener('scroll', this.onScroll);
+	}
+
 
 	componentWillReceiveProps(nextProps) {
-		const { chapter } = nextProps;
+		const {chapter} = nextProps;
 
 		if (chapter && chapter._id !== this.props.chapter._id) {
-			const { htmlContent } = chapter;
-			this.setState({ chapter, htmlContent });
+			const {htmlContent} = chapter;
+			this.setState({chapter, htmlContent});
 		}
 	}
 
-	static async getInitialProps({ req, query }) {
-		const { bookSlug, chapterSlug } = query;
+	static async getInitialProps({req, query}) {
+		const {bookSlug, chapterSlug} = query;
 
 		const headers = {};
 		if (req && req.headers && req.headers.cookie) {
 			headers.cookie = req.headers.cookie;
 		}
 
-		const chapter = await getChapterDetail({ bookSlug, chapterSlug }, { headers });
+		const chapter = await getChapterDetail({bookSlug, chapterSlug}, {headers});
 
-		return { chapter };
+		return {chapter};
 	}
 
 	toggleChapterList = () => {
-		this.setState({ showTOC: !this.state.showTOC });
+		this.setState({showTOC: !this.state.showTOC});
 	};
 
 	renderMainContent() {
-		const { chapter, htmlContent } = this.state;
+		const {chapter, htmlContent} = this.state;
 
 		return (
 			<div>
 				<h2>Chapter: {chapter.title}</h2>
 
-				<div className="main-content" dangerouslySetInnerHTML={{ __html: htmlContent }} />
+				<div className="main-content" dangerouslySetInnerHTML={{__html: htmlContent}}/>
 			</div>
 		);
 	}
 
 	renderSections() {
-		const { sections } = this.state.chapter;
+		const {sections} = this.state.chapter;
 
-		const { activeSection } = this.state;
+		const {activeSection} = this.state;
 		console.log(activeSection);
 
 		if (!sections || !sections.length === 0) {
@@ -143,7 +159,7 @@ class ReadChapter extends React.Component {
 		return (
 			<ul>
 				{sections.map(s => (
-					<li key={s.escapedText} style={{ paddingTop: '10px' }}>
+					<li key={s.escapedText} style={{paddingTop: '10px'}}>
 						<a
 							href={`#${s.escapedText}`}
 							style={{
@@ -159,14 +175,14 @@ class ReadChapter extends React.Component {
 	}
 
 	renderSidebar() {
-		const { showTOC, chapter } = this.state;
+		const {showTOC, chapter, hideHeader} = this.state;
 
 		if (!showTOC) {
 			return null;
 		}
 
-		const { book } = chapter;
-		const { chapters } = book;
+		const {book} = chapter;
+		const {chapters} = book;
 
 		return (
 			<div
@@ -174,7 +190,8 @@ class ReadChapter extends React.Component {
 					textAlign: 'left',
 					position: 'absolute',
 					bottom: 0,
-					top: '64px',
+					top: hideHeader ? 0 : '64px',
+					transition: 'top 0.5s ease-in',
 					left: 0,
 					overflowY: 'auto',
 					overflowX: 'hidden',
@@ -182,20 +199,20 @@ class ReadChapter extends React.Component {
 					padding: '0px 25px',
 				}}
 			>
-				<p style={{ padding: '0px 40px', fontSize: '17px', fontWeight: '400' }}>{book.name}</p>
-				<ol start="0" style={{ padding: '0 25', fontSize: '14px', fontWeight: '300' }}>
+				<p style={{padding: '0px 40px', fontSize: '17px', fontWeight: '400'}}>{book.name}</p>
+				<ol start="0" style={{padding: '0 25', fontSize: '14px', fontWeight: '300'}}>
 					{chapters.map((ch, i) => (
 						<li
 							key={ch._id}
 							role="presentation"
-							style={{ listStyle: i === 0 ? 'none' : 'decimal', paddingBottom: '10px' }}
+							style={{listStyle: i === 0 ? 'none' : 'decimal', paddingBottom: '10px'}}
 						>
 							<Link
 								prefetch
 								as={`/books/${book.slug}/${ch.slug}`}
 								href={`/public/read-chapter?bookSlug=${book.slug}&chapterSlug=${ch.slug}`}
 							>
-								<a style={{ color: chapter._id === ch._id ? '#1565C0' : '#222' }}>{ch.title}</a>
+								<a style={{color: chapter._id === ch._id ? '#1565C0' : '#222'}}>{ch.title}</a>
 							</Link>
 							{chapter._id === ch._id ? this.renderSections() : null}
 						</li>
@@ -207,10 +224,14 @@ class ReadChapter extends React.Component {
 
 
 	render() {
-		const { chapter } = this.state;
+		const { user } = this.props;
+
+		const {
+			chapter, showTOC, hideHeader,
+		} = this.state;
 
 		if (!chapter) {
-			return <Error statusCode={404} />;
+			return <Error statusCode={404}/>;
 		}
 
 		return (
@@ -222,9 +243,11 @@ class ReadChapter extends React.Component {
 							: `Chapter ${chapter.order - 1}. ${chapter.title}`}
 					</title>
 					{chapter.seoDescription ? (
-						<meta name="description" content={chapter.seoDescription} />
+						<meta name="description" content={chapter.seoDescription}/>
 					) : null}
 				</Head>
+
+				<Header user={user} hideHeader={hideHeader} />
 
 				{this.renderSidebar()}
 
@@ -235,7 +258,8 @@ class ReadChapter extends React.Component {
 						position: 'fixed',
 						right: 0,
 						bottom: 0,
-						top: '64px',
+						top: hideHeader ? 0 : '64px',
+						transition: 'top 0.5s ease-in',
 						left: '400px',
 						overflowY: 'auto',
 						overflowX: 'hidden',
@@ -248,7 +272,8 @@ class ReadChapter extends React.Component {
 				<div
 					style={{
 						position: 'fixed',
-						top: '80px',
+						top: hideHeader ? '20px' : '80px',
+						transition: 'top 0.5s ease-in',
 						left: '15px',
 					}}
 				>
@@ -267,4 +292,4 @@ class ReadChapter extends React.Component {
 	}
 }
 
-export default withAuth(withLayout(ReadChapter), { loginRequired: false });
+export default withAuth(withLayout(ReadChapter, { noHeader: true }), { loginRequired: false });
