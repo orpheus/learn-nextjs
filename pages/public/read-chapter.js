@@ -43,11 +43,18 @@ class ReadChapter extends React.Component {
 			hideHeader: false,
 			chapter,
 			htmlContent,
+			isMobile: false,
 		};
 	}
 
 	componentDidMount() {
 		document.getElementById('main-content').addEventListener('scroll', this.onScroll);
+
+		const isMobile = window.innerWidth < 768;
+
+		if (this.state.isMobile !== isMobile) {
+			this.setState({ isMobile }); // eslint-disable-line
+		}
 	}
 
 	onScroll = throttle(() => {
@@ -112,6 +119,7 @@ class ReadChapter extends React.Component {
 		const {chapter} = nextProps;
 
 		if (chapter && chapter._id !== this.props.chapter._id) {
+			document.getElementById('chapter-content').scrollIntoView();
 			const {htmlContent} = chapter;
 			this.setState({chapter, htmlContent});
 		}
@@ -134,14 +142,33 @@ class ReadChapter extends React.Component {
 		this.setState({showTOC: !this.state.showTOC});
 	};
 
+	closeTocWhenMobile = () => {
+		this.setState({ showTOC: !this.state.isMobile });
+	};
+
 	renderMainContent() {
-		const {chapter, htmlContent} = this.state;
+		const {
+			chapter, htmlContent, showTOC, isMobile,
+		} = this.state;
+
+		let padding = '20px 20%';
+
+		if (!isMobile && showTOC) {
+			padding = '20px 10%';
+		} else if (isMobile) {
+			padding = '0px 10px';
+		}
 
 		return (
-			<div>
-				<h2>Chapter: {chapter.title}</h2>
-
-				<div className="main-content" dangerouslySetInnerHTML={{__html: htmlContent}}/>
+			<div style={{ padding }} id="chapter-content">
+				<h2 style={{ fontWeight: '400', lineHeight: '1.5em' }}>
+					{chapter.order > 1 ? `Chapter ${chapter.order - 1}: ` : null}
+					{chapter.title}
+				</h2>
+				<div
+					// eslint-disable-next-line react/no-danger
+					dangerouslySetInnerHTML={{ __html: htmlContent }}
+				/>
 			</div>
 		);
 	}
@@ -162,6 +189,7 @@ class ReadChapter extends React.Component {
 					<li key={s.escapedText} style={{paddingTop: '10px'}}>
 						<a
 							href={`#${s.escapedText}`}
+							onClick={this.closeTocWhenMobile}
 							style={{
 								color: activeSection && activeSection.hash === s.escapedText ? '#1565C0' : '#222',
 							}}
@@ -175,7 +203,7 @@ class ReadChapter extends React.Component {
 	}
 
 	renderSidebar() {
-		const {showTOC, chapter, hideHeader} = this.state;
+		const {showTOC, chapter, hideHeader, isMobile} = this.state;
 
 		if (!showTOC) {
 			return null;
@@ -195,7 +223,7 @@ class ReadChapter extends React.Component {
 					left: 0,
 					overflowY: 'auto',
 					overflowX: 'hidden',
-					width: '400px',
+					width: isMobile ? '100%' : '400px',
 					padding: '0px 25px',
 				}}
 			>
@@ -212,7 +240,7 @@ class ReadChapter extends React.Component {
 								as={`/books/${book.slug}/${ch.slug}`}
 								href={`/public/read-chapter?bookSlug=${book.slug}&chapterSlug=${ch.slug}`}
 							>
-								<a style={{color: chapter._id === ch._id ? '#1565C0' : '#222'}}>{ch.title}</a>
+								<a onClick={this.closeTocWhenMobile} style={{color: chapter._id === ch._id ? '#1565C0' : '#222'}}>{ch.title}</a>
 							</Link>
 							{chapter._id === ch._id ? this.renderSections() : null}
 						</li>
@@ -227,11 +255,16 @@ class ReadChapter extends React.Component {
 		const { user } = this.props;
 
 		const {
-			chapter, showTOC, hideHeader,
+			chapter, showTOC, hideHeader, isMobile
 		} = this.state;
 
 		if (!chapter) {
 			return <Error statusCode={404}/>;
+		}
+
+		let left = '20px';
+		if (showTOC) {
+			left = isMobile ? '100%' : '400px';
 		}
 
 		return (
@@ -260,7 +293,7 @@ class ReadChapter extends React.Component {
 						bottom: 0,
 						top: hideHeader ? 0 : '64px',
 						transition: 'top 0.5s ease-in',
-						left: '400px',
+						left,
 						overflowY: 'auto',
 						overflowX: 'hidden',
 					}}
