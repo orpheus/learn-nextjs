@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import Error from 'next/error';
 import Head from 'next/head';
 import Link from 'next/link';
+import throttle from 'lodash/throttle';
+import isEqual from 'lodash/isEqual';
 
 import { getChapterDetail } from '../../lib/api/public';
 import withLayout from '../../lib/withLayout';
@@ -41,6 +43,54 @@ class ReadChapter extends React.Component {
 			htmlContent,
 		};
 	}
+
+	componentDidMount() {
+		document.getElementById('main-content').addEventListener('scroll', this.onScroll);
+	}
+
+	componentWillUnmount() {
+		document.getElementById('main-content').removeEventListener('scroll', this.onScroll);
+	}
+
+	onScroll = throttle(() => {
+		const sectionElms = document.querySelectorAll('span.section-anchor');
+		let activeSection;
+
+		let sectionAbove;
+		for (let i = 0; i < sectionElms.length; i += 1) {
+			const s = sectionElms[i];
+			const b = s.getBoundingClientRect();
+			const anchorBottom = b.bottom;
+
+			if (anchorBottom >= 0 && anchorBottom <= window.innerHeight) {
+				activeSection = {
+					hash: s.attributes.getNamedItem('name').value,
+				};
+
+				break;
+			}
+
+			if (anchorBottom > window.innerHeight && i > 0) {
+				if (sectionAbove.bottom <= 0) {
+					activeSection = {
+						hash: sectionElms[i - 1].attributes.getNamedItem('name').value,
+					};
+					break;
+				}
+			} else if (i + 1 === sectionElms.length) {
+				activeSection = {
+					hash: s.attributes.getNamedItem('name').value,
+				};
+			}
+
+			sectionAbove = b;
+		}
+
+
+		if (!isEqual(this.state.activeSection, activeSection)) {
+			this.setState({ activeSection });
+		}
+	}, 500);
 
 	componentWillReceiveProps(nextProps) {
 		const { chapter } = nextProps;
@@ -83,6 +133,9 @@ class ReadChapter extends React.Component {
 	renderSections() {
 		const { sections } = this.state.chapter;
 
+		const { activeSection } = this.state;
+		console.log(activeSection);
+
 		if (!sections || !sections.length === 0) {
 			return null;
 		}
@@ -91,7 +144,12 @@ class ReadChapter extends React.Component {
 			<ul>
 				{sections.map(s => (
 					<li key={s.escapedText} style={{ paddingTop: '10px' }}>
-						<a href={`#${s.escapedText}`}>
+						<a
+							href={`#${s.escapedText}`}
+							style={{
+								color: activeSection && activeSection.hash === s.escapedText ? '#1565C0' : '#222',
+							}}
+						>
 							{s.text}
 						</a>
 					</li>
