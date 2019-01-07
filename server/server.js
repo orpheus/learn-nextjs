@@ -12,6 +12,7 @@ import auth from './google'
 import { setupGithub as github } from './github';
 import routesWithSlug from './routesWithSlug';
 import getRootUrl from '../lib/api/getRootUrl';
+import sitemapAndRobots from './sitemapAndRobots';
 
 dotenv.config();
 
@@ -60,12 +61,18 @@ app.prepare().then(() => {
 			maxAge: 14 * 24 * 60 * 60 * 1000,
 		}
 	});
+
+	if (!dev) {
+		server.set('trust proxy', 1);
+		sess.cookie.secure = true;
+	}
 	server.use(sess);
 
 	auth({ server, ROOT_URL })
 	github({ server });
 	api(server);
 	routesWithSlug({ server, app });
+	sitemapAndRobots({ server });
 
 	server.get('*', (req, res) => {
 		const url = URL_MAP[req.path];
