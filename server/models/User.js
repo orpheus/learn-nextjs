@@ -48,6 +48,7 @@ const mongoSchema = new Schema({
 	githubAccessToken: {
 		type: String,
 	},
+	purchasedBookIds: [String]
 });
 
 class UserClass {
@@ -60,6 +61,7 @@ class UserClass {
 			'slug',
 			'isAdmin',
 			'isGithubConnected',
+			'purchasedBookIds',
 		];
 	}
 

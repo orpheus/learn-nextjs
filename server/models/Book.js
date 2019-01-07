@@ -7,6 +7,7 @@ import Chapter from './Chapter';
 import { getCommits, getContent } from '../github';
 import logger from '../logs';
 
+import User from './User';
 import Purchase from './Purchase';
 import { stripeCharge } from '../stripe';
 import getEmailTemplate from './EmailTemplate';
@@ -205,6 +206,8 @@ class BookClass {
 			buyerEmail: user.email,
 		});
 
+		User.findByIdAndUpdate(user.id, { $addToSet: { purchasedBookIds: book.id } }).exec();
+
 		const template = await getEmailTemplate('purchase', {
 			userName: user.displayName,
 			bookTitle: book.name,
@@ -229,6 +232,13 @@ class BookClass {
 			stripeCharge: chargeObj,
 			createdAt: new Date(),
 		});
+	}
+
+	static async getPurchasedBooks({ purchasedBookIds }) {
+		const purchasedBooks = await this.find({ _id: { $in: purchasedBookIds } }).sort({
+			createdAt: -1,
+		});
+		return { purchasedBooks };
 	}
 }
 
