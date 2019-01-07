@@ -2,8 +2,10 @@
   "name": "learn-nextjs",
   "version": "0.0.1",
   "scripts": {
-    "build": "next build",
-    "start": "next start",
+    "build": "npm run build:next && npm run build:server",
+    "build:next": "next build",
+    "build:server": "babel server -d compiled/server && cp -R static compiled",
+    "start": "node compiled/server/server.js",
     "dev": "nodemon server/server.js --watch server --exec babel-node --presets=@babel/preset-env",
     "test": "jest"
   },

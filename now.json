@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "env": {
+    "NODE_ENV": "production",
+    "StripePublishableKey": "pk_live_xxxxxx"
+
+  },
+
+  "dotenv": true
+}
