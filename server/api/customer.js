@@ -26,4 +26,16 @@ router.post('/buy-book', async (req, res) => {
 	}
 });
 
+router.get(`/my-books`, async (req, res) => {
+	try {
+		const { purchasedBookIds = [] } = req.user;
+
+		const { purchasedBooks } = await Book.getPurchasedBooks({ purchasedBookIds });
+
+		res.json({ purchasedBooks });
+	} catch (err) {
+		res.json({error: err.message || err.toString()})
+	}
+})
+
 export default router;
