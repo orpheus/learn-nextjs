@@ -148,14 +148,21 @@ class BookClass {
 		});
 
 		await Promise.all(mainFolder.data.map(async (f) => {
+			console.log('file path', f.path)
+
 			if (f.type !== 'file') {
 				return;
 			}
 
-			if (f.path !== 'introduction.md' && !/chapter-(\[0-9]+)\.md/.test(f.path)) {
+			if (f.path !== 'introduction.md' && !/chapter-(\d+)\.md/.test(f.path)) {
 				// not chapter content, skip
 				return;
 			}
+			//
+			// if (f.path !== 'introduction.md' && !/chapter-(\[0-9]+)\.md/.test(f.path)) {
+			// 	// not chapter content, skip
+			// 	return;
+			// }
 
 			const chapter = await getContent({
 				accessToken: githubAccessToken,
