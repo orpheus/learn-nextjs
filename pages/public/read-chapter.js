@@ -5,11 +5,13 @@ import Head from 'next/head';
 import Link from 'next/link';
 import throttle from 'lodash/throttle';
 import isEqual from 'lodash/isEqual';
+import { withRouter } from 'next/router';
 
 import Header from '../../components/Header';
 import {getChapterDetail} from '../../lib/api/public';
 import withLayout from '../../lib/withLayout';
 import withAuth from '../../lib/withAuth';
+import BuyButton from '../../components/customer/BuyButton';
 
 const styleIcon = {
 	opacity: '0.75',
@@ -22,10 +24,15 @@ class ReadChapter extends React.Component {
 		chapter: PropTypes.shape({
 			_id: PropTypes.string.isRequired,
 		}),
+		router: PropTypes.shape({
+			asPath: PropTypes.string.isRequired,
+		}).isRequired,
+		showStripeModal: PropTypes.bool.isRequired,
 	};
 
 	static defaultProps = {
 		chapter: null,
+		router: {}
 	};
 
 	constructor(props) {
@@ -34,8 +41,10 @@ class ReadChapter extends React.Component {
 		const {chapter} = props;
 
 		let htmlContent = '';
-		if (chapter) {
+		if (chapter && (chapter.isPurchased || chapter.isFree)) {
 			htmlContent = chapter.htmlContent;
+		} else {
+			htmlContent = chapter.htmlExcerpt;
 		}
 
 		this.state = {
@@ -53,7 +62,7 @@ class ReadChapter extends React.Component {
 		const isMobile = window.innerWidth < 768;
 
 		if (this.state.isMobile !== isMobile) {
-			this.setState({ isMobile }); // eslint-disable-line
+			this.setState({isMobile}); // eslint-disable-line
 		}
 	}
 
@@ -120,7 +129,12 @@ class ReadChapter extends React.Component {
 
 		if (chapter && chapter._id !== this.props.chapter._id) {
 			document.getElementById('chapter-content').scrollIntoView();
-			const {htmlContent} = chapter;
+			let htmlContent = '';
+			if (chapter && (chapter.isPurchased || chapter.isFree)) {
+				htmlContent = chapter.htmlContent;
+			} else {
+				htmlContent = chapter.htmlExcerpt;
+			}
 			this.setState({chapter, htmlContent});
 		}
 	}
@@ -134,8 +148,10 @@ class ReadChapter extends React.Component {
 		}
 
 		const chapter = await getChapterDetail({bookSlug, chapterSlug}, {headers});
+		// console.log('init props: ', chapter)
+		const showStripeModal = req ? !!req.query.buy : window.location.search.includes('buy=1');
 
-		return {chapter};
+		return {chapter, showStripeModal};
 	}
 
 	toggleChapterList = () => {
@@ -143,13 +159,17 @@ class ReadChapter extends React.Component {
 	};
 
 	closeTocWhenMobile = () => {
-		this.setState({ showTOC: !this.state.isMobile });
+		this.setState({showTOC: !this.state.isMobile});
 	};
 
 	renderMainContent() {
+		const {user, showStripeModal} = this.props;
+
 		const {
 			chapter, htmlContent, showTOC, isMobile,
 		} = this.state;
+
+		const {book} = chapter
 
 		let padding = '20px 20%';
 
@@ -159,16 +179,20 @@ class ReadChapter extends React.Component {
 			padding = '0px 10px';
 		}
 
+		// console.log('chapter:', chapter)
 		return (
-			<div style={{ padding }} id="chapter-content">
-				<h2 style={{ fontWeight: '400', lineHeight: '1.5em' }}>
+			<div style={{padding}} id="chapter-content">
+				<h2 style={{fontWeight: '400', lineHeight: '1.5em'}}>
 					{chapter.order > 1 ? `Chapter ${chapter.order - 1}: ` : null}
 					{chapter.title}
 				</h2>
 				<div
 					// eslint-disable-next-line react/no-danger
-					dangerouslySetInnerHTML={{ __html: htmlContent }}
+					dangerouslySetInnerHTML={{__html: htmlContent}}
 				/>
+				{!chapter.isPurchased && !chapter.isFree ? (
+					<BuyButton user={user} book={book} showModal={showStripeModal}/>
+				) : null}
 			</div>
 		);
 	}
@@ -240,7 +264,8 @@ class ReadChapter extends React.Component {
 								as={`/books/${book.slug}/${ch.slug}`}
 								href={`/public/read-chapter?bookSlug=${book.slug}&chapterSlug=${ch.slug}`}
 							>
-								<a onClick={this.closeTocWhenMobile} style={{color: chapter._id === ch._id ? '#1565C0' : '#222'}}>{ch.title}</a>
+								<a onClick={this.closeTocWhenMobile}
+								   style={{color: chapter._id === ch._id ? '#1565C0' : '#222'}}>{ch.title}</a>
 							</Link>
 							{chapter._id === ch._id ? this.renderSections() : null}
 						</li>
@@ -252,7 +277,7 @@ class ReadChapter extends React.Component {
 
 
 	render() {
-		const { user } = this.props;
+		const { user, router } = this.props;
 
 		const {
 			chapter, showTOC, hideHeader, isMobile
@@ -280,7 +305,7 @@ class ReadChapter extends React.Component {
 					) : null}
 				</Head>
 
-				<Header user={user} hideHeader={hideHeader} />
+				<Header user={user} hideHeader={hideHeader} redirectUrl={router.asPath}/>
 
 				{this.renderSidebar()}
 
@@ -325,4 +350,4 @@ class ReadChapter extends React.Component {
 	}
 }
 
-export default withAuth(withLayout(ReadChapter, { noHeader: true }), { loginRequired: false });
+export default withAuth(withLayout(withRouter(ReadChapter), {noHeader: true}), {loginRequired: false});
