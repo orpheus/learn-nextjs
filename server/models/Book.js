@@ -12,6 +12,7 @@ import Purchase from './Purchase';
 import { stripeCharge } from '../stripe';
 import getEmailTemplate from './EmailTemplate';
 import sendEmail from '../aws';
+import subscribe from '../mailchimp'
 
 const ROOT_URL = 'http://localhost:8000';
 
@@ -222,7 +223,13 @@ class BookClass {
 				body: template.message,
 			});
 		} catch (error) {
-			logger.error('Email sending error:', error);
+			logger.error(`sending welcome email: ${error}`);
+		}
+
+		try {
+			await subscribe({ email: user.email });
+		} catch (error) {
+			logger.error(`sending mailchimp email: ${error}`);
 		}
 
 		return Purchase.create({
