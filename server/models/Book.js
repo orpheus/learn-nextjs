@@ -13,8 +13,9 @@ import { stripeCharge } from '../stripe';
 import getEmailTemplate from './EmailTemplate';
 import sendEmail from '../aws';
 import subscribe from '../mailchimp'
+import getRootUrl from '../../lib/api/getRootUrl';
 
-const ROOT_URL = 'http://localhost:8000';
+const ROOT_URL = getRootUrl();
 
 const {Schema} = mongoose;
 

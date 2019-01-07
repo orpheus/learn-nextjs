@@ -9,6 +9,7 @@ import api from './api'
 import auth from './google'
 import { setupGithub as github } from './github';
 import routesWithSlug from './routesWithSlug';
+import getRootUrl from '../lib/api/getRootUrl';
 
 dotenv.config();
 
@@ -27,7 +28,7 @@ mongoose.connect(
 );
 
 const port = process.env.PORT || 8000;
-const ROOT_URL = `http://localhost:${port}`;
+const ROOT_URL = getRootUrl()
 
 const app = next({dev});
 const handle = app.getRequestHandler();
