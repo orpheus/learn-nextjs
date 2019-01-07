@@ -4,6 +4,8 @@ import next from 'next';
 import mongoose from 'mongoose';
 import session from 'express-session';
 import mongoSessionStore from 'connect-mongo';
+import helmet from 'helmet'
+
 import logger from './logs'
 import api from './api'
 import auth from './google'
@@ -40,6 +42,7 @@ const URL_MAP = {
 
 app.prepare().then(() => {
 	const server = express();
+	server.use(helmet())
 	server.use(express.json());
 	const MongoStore = mongoSessionStore(session);
 
