@@ -8,6 +8,7 @@ import withLayout from '../../lib/withLayout';
 import { styleLoginButton } from '../../components/SharedStyles';
 
 function Login({router}) {
+	// console.log('router: ', router)
 	const redirectUrl = (router && router.query && router.query.redirectUrl) || '';
 
 	return (
@@ -21,7 +22,7 @@ function Login({router}) {
 			<br />
 			<p style={{ margin: '45px auto', fontSize: '44px', fontWeight: '400' }}>
 				Log in
-			</p>
+			</p>`
 			<p>
 				You’ll be logged in for 14 days unless you log out manually.
 			</p>
@@ -36,6 +37,12 @@ function Login({router}) {
 			</Button>
 		</div>
 	);
+}
+
+Login.getInitialProps = async (ctx) => {
+	let {query} = ctx
+	console.log('login query', query)
+	return {}
 }
 
 Login.propTypes = {

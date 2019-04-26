@@ -5,10 +5,8 @@ import htmlescape from 'htmlescape'
 import getContext from '../lib/context';
 
 const { StripePublishableKey } = process.env;
-console.log(StripePublishableKey);
-
 const env = { StripePublishableKey };
-console.log(env);
+
 
 class MyDocument extends Document {
 	render() {
@@ -46,6 +44,7 @@ class MyDocument extends Document {
 				/>
 				<style>
 					{`
+				
 					   a, a:focus {
 					     font-weight: 400;
 					     color: #1565C0;

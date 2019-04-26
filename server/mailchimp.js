@@ -1,4 +1,4 @@
-import request from 'request';
+uest from 'request';
 
 require('dotenv').config();
 

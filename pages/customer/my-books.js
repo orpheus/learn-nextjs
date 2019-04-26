@@ -19,7 +19,6 @@ class MyBooks extends React.Component {
 	};
 
 	static async getInitialProps({ req, res }) {
-
 		if (req && !req.user) {
 			res.redirect('/login');
 			return { purchasedBooks: [] };

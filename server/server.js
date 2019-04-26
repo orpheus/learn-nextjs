@@ -30,7 +30,7 @@ mongoose.connect(
 	options,
 );
 
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 8001;
 const ROOT_URL = getRootUrl()
 
 const app = next({dev});
